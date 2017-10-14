@@ -16,7 +16,8 @@
     "polymer": "Polymer/polymer#^2.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
     "paper-input": "PolymerElements/paper-input#^2.0.2",
-    "iron-form": "PolymerElements/iron-form#^2.0.1"
+    "iron-form": "PolymerElements/iron-form#^2.0.1",
+    "vaadin-grid": "vaadin/vaadin-grid#^3.0.2"
   },
   "resolutions": {
     "polymer": "^2.0.0"

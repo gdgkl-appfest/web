@@ -26,9 +26,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script src="https://www.gstatic.com/firebasejs/4.5.1/firebase.js"></script>
 
-<link rel="lazy-import" href="my-view1.html">
-<link rel="lazy-import" href="my-view2.html">
-<link rel="lazy-import" href="my-view3.html">
+<link rel="lazy-import" href="my-home.html">
+<link rel="lazy-import" href="my-new.html">
+<link rel="lazy-import" href="my-edit.html">
+<link rel="lazy-import" href="my-login.html">
 <link rel="lazy-import" href="my-view404.html">
 
 <dom-module id="my-app">
@@ -85,9 +86,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="[[rootPath]]view1">View One</a>
-          <a name="view2" href="[[rootPath]]view2">View Two</a>
-          <a name="view3" href="[[rootPath]]view3">View Three</a>
+          <a name="home" href="[[rootPath]]home">Home</a>
+          <a name="new" href="[[rootPath]]new">New</a>
+          <a name="events" href="[[rootPath]]events">Events</a>
         </iron-selector>
       </app-drawer>
 
@@ -102,9 +103,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </app-header>
 
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-          <my-view1 name="view1"></my-view1>
-          <my-view2 name="view2"></my-view2>
-          <my-view3 name="view3"></my-view3>
+          <my-home name="home"></my-home>
+          <my-new id="new" name="new"></my-new>
+          <my-login name="login"></my-login>
+          <my-edit name="edit" route="{{route}}"></my-edit>
+          <my-events name="events" route="{{route}}"></my-events>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
@@ -138,8 +141,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routePageChanged(page) {
         // If no page was found in the route data, page will be an empty string.
-        // Default to 'view1' in that case.
-        this.page = page || 'view1';
+        // Default to 'home' in that case.
+        this.page = page || 'home';
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
@@ -152,7 +155,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
         Polymer.importHref(
           resolvedPageUrl,
-          null,
+          () => {
+            if (this.page == 'new'){
+              this.$.new.refreshData();
+            }
+            
+          },
           this._showPage404.bind(this),
           true);
       }
@@ -164,8 +172,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ready() {
         super.ready();
 
-
-        // Initialize Firebase
         var config = {
           apiKey: "AIzaSyAB0rl1mReKmFfYjyqqCxU8TQutNFALbYo",
           authDomain: "gdgkl-appfest.firebaseapp.com",

@@ -1,0 +1,203 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-edit">
+    <template>
+        <style include="shared-styles">
+            :host {
+                display: block;
+
+                padding: 10px;
+            }
+
+            .card {
+                max-width: 1000px;
+            }
+
+            .card .image {
+                height: 400px;
+            }
+
+            .row {
+                display: flex;
+            }
+
+            .row paper-input {
+                margin-right: 8px;
+            }
+
+            .card .image {
+                position: relative;
+                background-color: grey;
+            }
+
+            .card .image .button {
+                display: flex;
+                bottom: 16px;
+                right: 16px;
+                background: white;
+                position: absolute;
+                padding: 8px 16px;
+                border-radius: 4px;
+                box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            }
+
+            .card .image .button span {
+                margin-top: 1px;
+            }
+
+            .card .image .button iron-icon {
+                margin-right: 8px;
+            }
+
+            .card .action {
+                justify-content: flex-start;
+            }
+
+            .card .action .button {
+                margin-right: 12px;
+            }
+
+            paper-input,
+            paper-textarea {
+                max-width: 680px;
+            }
+        </style>
+
+        <app-route route="{{route}}" pattern="/edit/:id" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+        <input hidden type="file" id="cover_pic_input" accept="image/*" on-change="cover_pic_changed">
+
+        <div class="card">
+            <div id="cover_pic" class="image" style$="background-image:url('{{items.photoUrl}}')">
+                <div class="button" on-tap="uploadImage">
+                    <iron-icon icon="my-icons:add-a-photo"></iron-icon>
+                    <span>Add Photo</span>
+                </div>
+            </div>
+            <iron-form id="form">
+                <form>
+                    <div class="content">
+                        <paper-input name="name" label="Event Name" value="{{items.name}}" required></paper-input>
+                        <paper-input name="date" value="{{items.date}}" label="Date" required></paper-input>
+                        <paper-input name="venue" value="{{items.venue}}" label="Venue Name" required></paper-input>
+                        <paper-textarea always-float-label name="address" value="{{items.address}}" label="Venue Address"></paper-textarea>
+                        <paper-textarea always-float-label name="description" value="{{items.description}}" label="Description"></paper-textarea>
+                    </div>
+
+                    <div class="action">
+                        <div class="button" on-tap="save">Save</div>
+                        <a href="/" class="button">Discard</a>
+                    </div>
+
+                </form>
+            </iron-form>
+
+        </div>
+    </template>
+
+    <script>
+        class MyEdit extends Polymer.GestureEventListeners(Polymer.Element) {
+            static get is() { return 'my-edit'; }
+
+            static get observers() {
+                return [
+                    '_routePageChanged(routeData.id)'
+                ];
+            }
+
+            _routePageChanged(page) {
+                if (page === undefined) {
+                    return;
+                }
+
+                var eventItemsRef = firebase.database().ref('events/' + this.routeData.id);
+                eventItemsRef.on('value', snapshot => {
+                    var items = snapshot.val();
+                    this.updateId = items._id;
+                    this.set('items', items);
+                });
+            }
+
+            uploadImage() {
+                this.$.cover_pic_input.click();
+            }
+
+            save() {
+                this.$.form.submit();
+            }
+
+            cover_pic_changed(event) {
+                if (this.$.cover_pic_input.files && this.$.cover_pic_input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.$.cover_pic.style.backgroundImage = 'url(' + e.target.result + ')'
+                    }
+                    reader.readAsDataURL(this.$.cover_pic_input.files[0]);
+                }
+            }
+
+            ready() {
+                super.ready();
+                var form = this.$.form;
+
+                form.addEventListener('iron-form-presubmit', (event) => {
+                    event.preventDefault();
+                    var data = form.serializeForm();
+                    if (this.$.cover_pic_input.files && this.$.cover_pic_input.files[0]) {
+                        var extension = this.$.cover_pic_input.files[0].name.split('.').pop().toLowerCase();
+                        var reader = new FileReader();
+                        reader.onload = e => {
+                            var uploadTask = firebase.storage().ref('/test').child(this.updateId + '.' + extension)
+                                .putString(e.target.result.substring(23), 'base64', { contentType: 'image/' + extension })
+
+                            uploadTask.on('state_changed', snapshot => { }, error => { }, () => {
+                                var downloadURL = uploadTask.snapshot.downloadURL;
+                                data.photoUrl = downloadURL;
+                                data.timestamp = Date.now();
+
+                                //firebase.database().ref('events/' + data.id).set(data);
+                                firebase.database().ref('events/' + this.updateId).update({
+                                    address: data.address,
+                                    date: data.date,
+                                    description: data.description,
+                                    name: data.name,
+                                    photoUrl: data.photoUrl,
+                                    timestamp: Date.now(),
+                                    venue: data.venue,
+                                });
+                            })
+                        }
+                        reader.readAsDataURL(this.$.cover_pic_input.files[0]);
+                    }
+                    else {
+                        firebase.database().ref('events/' + this.updateId).update({
+                            address: data.address,
+                            date: data.date,
+                            description: data.description,
+                            name: data.name,
+                            timestamp: Date.now(),
+                            venue: data.venue,
+                        });
+                    }
+                });
+
+            }
+        }
+
+        window.customElements.define(MyEdit.is, MyEdit);
+    </script>
+</dom-module>

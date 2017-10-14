@@ -1,0 +1,191 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-events">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      .card {
+        max-width: 1000px;
+      }
+
+      .card .image {
+        height: 400px;
+      }
+
+      .card.photo {
+        box-sizing: border-box;
+        padding: 16px;
+      }
+
+      .card.photo h2{
+        font-weight: 400;
+        margin: 0 0 24px 0;
+      }
+
+      .card.attendees {
+        padding: 16px 0;
+        box-sizing: border-box;
+      }
+
+      .card.attendees h2 {
+        font-weight: 400;
+        margin: 0 0 24px 16px;
+      }
+
+      .small_photo {
+        display: inline-block;
+        border-radius: 50%;
+        width: 96px;
+        height: 96px;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        margin-right: 12px;
+      }
+
+
+      table {
+        margin: 8px 0;
+        width: 100%;
+        border-spacing: 0;
+      }
+
+      thead tr th {
+        font-weight: 500;
+        padding: 10px 10px 10px 0;
+        text-align: left;
+        border-bottom: 1px solid #eeeeee;
+        color: #ffb946;
+        white-space: nowrap;
+      }
+
+      tbody tr {
+        background-color: transparent;
+        transition: background-color 50ms ease-in-out;
+        white-space: nowrap;
+      }
+
+      tbody tr:hover {
+        cursor: pointer;
+        background-color: #F5F5F5;
+      }
+
+      tbody tr td {
+        font-size: 14px;
+        padding: 10px 10px 10px 0;
+        border-bottom: 1px solid #eeeeee;
+      }
+
+      tbody tr:last-of-type td {
+        border-bottom: 1px solid transparent;
+      }
+
+      th:first-of-type,
+      td:first-of-type{
+        padding-left: 12px;
+      }
+    </style>
+
+    <app-route route="{{route}}" pattern="/events/:id" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+    <a href="/edit/{{routeData.id}}" class="fab">
+      <iron-icon icon="my-icons:edit"></iron-icon>
+    </a>
+
+    <div class="card">
+      <div id="cover_pic" class="image" style$="background-image: url('{{items.photoUrl}}')"></div>
+      <div class="content">
+        <h2>{{items.name}}</h2>
+        <p class="date">{{items.date}}</p>
+        <p class="detail">{{items.venue}} &middot; {{items.address}}</p>
+        <p>{{items.description}}</p>
+      </div>
+    </div>
+
+    <div class="card photo">
+      <h2>Photos</h2>
+      <template is="dom-repeat" items="{{items.photos}}">
+        <a href="{{item.url}}" class="small_photo" style$="background-image: url('{{item.url}}')" width="100%" ;></a>
+      </template>
+    </div>
+
+    <div class="card attendees">
+      <h2>Attendees</h2>
+      <table>
+        <thead>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Check-in</th>
+        </thead>
+        <tbody>
+          <template is="dom-repeat" items="{{items.users}}" initial-count="10">
+            <tr>
+              <td>{{_plusOne(index)}}</td>
+              <td>{{item.name}}</td>
+              <td>{{item.email}}</td>
+              <td><input type="checkbox" checked="{{_showCheckbox(item.status)}}"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+
+    </div>
+  </template>
+
+  <script>
+    class MyEvents extends Polymer.Element {
+      static get is() { return 'my-events'; }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.id)'
+        ];
+      }
+
+      _plusOne(index){
+        return index + 1;
+      }
+
+      _showCheckbox(status){
+        return true;
+        //Absent (Checkbox disable)
+        //RSVP (Checkbox enabled)
+        //Attended (Checkbox checked)
+      }
+
+      _routePageChanged(page) {
+        if (page === undefined) {
+          return;
+        }
+
+        var eventItemsRef = firebase.database().ref('fake_events/' + this.routeData.id);
+        eventItemsRef.on('value', snapshot => {
+          var items = snapshot.val();
+          this.set('items', items);
+        });
+      }
+    }
+
+    window.customElements.define(MyEvents.is, MyEvents);
+  </script>
+</dom-module>

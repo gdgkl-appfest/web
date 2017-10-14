@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view2">
+<dom-module id="my-new">
   <template>
     <style include="shared-styles">
       :host {
@@ -41,6 +41,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .card .image {
         position: relative;
+        background-color: grey;
       }
 
       .card .image .button {
@@ -62,8 +63,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-right: 8px;
       }
 
+      .card .action {
+        justify-content: flex-start;
+      }
+
       .card .action .button {
-        margin-left: 12px;
+        margin-right: 12px;
       }
 
       paper-input,
@@ -72,10 +77,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-
+    <input hidden type="file" id="cover_pic_input" accept="image/*" on-change="cover_pic_changed">
 
     <div class="card">
-      <div class="image" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/ioxkl17.appspot.com/o/images%2Fcover.jpg?alt=media')">
+      <div id="cover_pic" class="image">
         <div class="button" on-tap="uploadImage">
           <iron-icon icon="my-icons:add-a-photo"></iron-icon>
           <span>Add Photo</span>
@@ -84,55 +89,82 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <iron-form id="form">
         <form>
           <div class="content">
-            <paper-input value="Google I/O Extended 2017 Kuala Lumpur" label="Event Name" required></paper-input>
-            <div class="row">
-              <paper-input name="startTime" value="9:00 AM" label="Start Time" required></paper-input>
-              <paper-input name="endTime" value="6:00 PM" label="End Time" required></paper-input>
-            </div>
-            <paper-input value="Google Malaysia" label="Venue Name" required></paper-input>
-            <paper-textarea value="Axiata Tower (Quill 7), 9, Jalan Stesen Sentral 5, Kuala Lumpur Sentral, 50470 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur, Malaysia"
+            <paper-input name="name" label="Event Name" value="" required></paper-input>
+            <paper-input name="date" value="" label="Date" required></paper-input>
+            <paper-input name="venue" value="" label="Venue Name" required></paper-input>
+            <paper-textarea name="address" value=""
               label="Venue Address"></paper-textarea>
-            <paper-textarea value="Google IO Extended Kuala Lumpur will once again happen on the 22nd of July 2017! We will be inviting speakers that are consists of local experts and Googlers to come and share about the experience in using Google technologies and best practices to propel your journey forward as a developer.
-        
-        Don't miss your chance to learn more about the latest and greatest Google technologies and 1337 Dev skills from the dev experts! Seats will be limited, sign up now!"
+            <paper-textarea name="description" value=""
               label="Description"></paper-textarea>
           </div>
 
           <div class="action">
-            <a href="/" class="button">Discard</a>
             <div class="button" on-tap="save">Save</div>
+            <a href="/" class="button">Discard</a>
           </div>
 
         </form>
       </iron-form>
 
+    </div>
   </template>
 
   <script>
-    class MyView2 extends Polymer.GestureEventListeners(Polymer.Element) {
-      static get is() { return 'my-view2'; }
+    class MyNew extends Polymer.GestureEventListeners(Polymer.Element) {
+      static get is() { return 'my-new'; }
 
       uploadImage() {
-        console.log('upload')
-        console.log(firebase)
+        this.$.cover_pic_input.click();
       }
 
       save() {
         this.$.form.submit();
       }
 
+      cover_pic_changed(event) {
+        if (this.$.cover_pic_input.files && this.$.cover_pic_input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = (e) => {
+            this.$.cover_pic.style.backgroundImage = 'url(' + e.target.result + ')'
+          }
+          reader.readAsDataURL(this.$.cover_pic_input.files[0]);
+        }
+      }
+
+      refreshData() {
+        this.$.form.reset();
+      }
+
       ready() {
         super.ready();
         var form = this.$.form;
-        form.addEventListener('iron-form-presubmit', function (event) {
+
+        form.addEventListener('iron-form-presubmit', (event) => {
           event.preventDefault();
-          console.log(form.serializeForm())
-          // var firebase = new Firebase(form.getAttribute('action'));
-          // firebase.set(form.serializeForm());
+          var data = form.serializeForm();
+          data._id = data.name.replace(/[^\w\s]/gi, "").replace(/\s+/g, '-').toLowerCase();
+          if (this.$.cover_pic_input.files && this.$.cover_pic_input.files[0]) {
+            var extension = this.$.cover_pic_input.files[0].name.split('.').pop().toLowerCase();
+            var reader = new FileReader();
+            reader.onload = e => {
+              var uploadTask = firebase.storage().ref('/test').child(data._id + '.' + extension)
+                .putString(e.target.result.substring(23), 'base64', { contentType: 'image/' + extension })
+
+              uploadTask.on('state_changed', snapshot => { }, error => { }, () => {
+                var downloadURL = uploadTask.snapshot.downloadURL;
+                data.photoUrl = downloadURL;
+                data.timestamp = Date.now();
+
+                firebase.database().ref('events/' + data._id).set(data);
+              })
+            }
+            reader.readAsDataURL(this.$.cover_pic_input.files[0]);
+          }
         });
+
       }
     }
 
-    window.customElements.define(MyView2.is, MyView2);
+    window.customElements.define(MyNew.is, MyNew);
   </script>
 </dom-module>
