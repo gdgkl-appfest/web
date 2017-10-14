@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-view2">
@@ -53,11 +54,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
-      .card .image .button span{
+      .card .image .button span {
         margin-top: 1px;
       }
 
-      .card .image .button iron-icon{
+      .card .image .button iron-icon {
         margin-right: 8px;
       }
 
@@ -71,38 +72,65 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
+
+
     <div class="card">
       <div class="image" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/ioxkl17.appspot.com/o/images%2Fcover.jpg?alt=media')">
-        <div class="button">
+        <div class="button" on-tap="uploadImage">
           <iron-icon icon="my-icons:add-a-photo"></iron-icon>
           <span>Add Photo</span>
         </div>
       </div>
-      <div class="content">
-        <paper-input value="Google I/O Extended 2017 Kuala Lumpur" label="Event Name" required></paper-input>
-        <div class="row">
-          <paper-input value="9:00 AM" label="Start Time" required></paper-input>
-          <paper-input value="6:00 PM" label="End Time" required></paper-input>
-        </div>
-        <paper-input value="Google Malaysia" label="Venue Name" required></paper-input>
-        <paper-textarea value="Axiata Tower (Quill 7), 9, Jalan Stesen Sentral 5, Kuala Lumpur Sentral, 50470 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur, Malaysia"
-          label="Venue Address"></paper-textarea>
-        <paper-textarea value="Google IO Extended Kuala Lumpur will once again happen on the 22nd of July 2017! We will be inviting speakers that are consists of local experts and Googlers to come and share about the experience in using Google technologies and best practices to propel your journey forward as a developer.
+      <iron-form id="form">
+        <form>
+          <div class="content">
+            <paper-input value="Google I/O Extended 2017 Kuala Lumpur" label="Event Name" required></paper-input>
+            <div class="row">
+              <paper-input name="startTime" value="9:00 AM" label="Start Time" required></paper-input>
+              <paper-input name="endTime" value="6:00 PM" label="End Time" required></paper-input>
+            </div>
+            <paper-input value="Google Malaysia" label="Venue Name" required></paper-input>
+            <paper-textarea value="Axiata Tower (Quill 7), 9, Jalan Stesen Sentral 5, Kuala Lumpur Sentral, 50470 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur, Malaysia"
+              label="Venue Address"></paper-textarea>
+            <paper-textarea value="Google IO Extended Kuala Lumpur will once again happen on the 22nd of July 2017! We will be inviting speakers that are consists of local experts and Googlers to come and share about the experience in using Google technologies and best practices to propel your journey forward as a developer.
         
         Don't miss your chance to learn more about the latest and greatest Google technologies and 1337 Dev skills from the dev experts! Seats will be limited, sign up now!"
-          label="Description"></paper-textarea>
-      </div>
-      <div class="action">
-        <a href="/" class="button">Discard</a>
-        <a href="/" class="button">Save</a>
-      </div>
-    </div>
+              label="Description"></paper-textarea>
+          </div>
+
+          <div class="action">
+            <a href="/" class="button">Discard</a>
+            <div class="button" on-tap="save">Save</div>
+          </div>
+
+        </form>
+      </iron-form>
 
   </template>
 
   <script>
-    class MyView2 extends Polymer.Element {
+    class MyView2 extends Polymer.GestureEventListeners(Polymer.Element) {
       static get is() { return 'my-view2'; }
+
+      uploadImage() {
+        console.log('upload')
+        console.log(firebase)
+      }
+
+      save() {
+        this.$.form.submit();
+      }
+
+      ready() {
+        super.ready();
+        var form = this.$.form;
+        form.addEventListener('iron-form-presubmit', function (event) {
+          event.preventDefault();
+          console.log(form.serializeForm())
+          // var firebase = new Firebase(form.getAttribute('action'));
+          // firebase.set(form.serializeForm());
+        });
+      }
     }
 
     window.customElements.define(MyView2.is, MyView2);
