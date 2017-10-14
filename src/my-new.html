@@ -132,6 +132,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       refreshData() {
+        this.$.cover_pic.style.backgroundImage = "";
         this.$.form.reset();
       }
 
@@ -156,6 +157,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 data.timestamp = Date.now();
 
                 firebase.database().ref('events/' + data._id).set(data);
+
+                window.history.pushState({}, null, '/events/' + data._id);
+                window.dispatchEvent(new CustomEvent('location-changed'));
               })
             }
             reader.readAsDataURL(this.$.cover_pic_input.files[0]);

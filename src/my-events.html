@@ -35,7 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 16px;
       }
 
-      .card.photo h2{
+      .card.photo h2 {
         font-weight: 400;
         margin: 0 0 24px 0;
       }
@@ -99,7 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       th:first-of-type,
-      td:first-of-type{
+      td:first-of-type {
         padding-left: 12px;
       }
     </style>
@@ -122,38 +122,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="card photo">
       <h2>Photos</h2>
-      <template is="dom-repeat" items="{{items.photos}}">
-        <a href="{{item.url}}" class="small_photo" style$="background-image: url('{{item.url}}')" width="100%" ;></a>
+      <template is="dom-if" if="[[items.photos]]">
+        <template is="dom-repeat" items="[[items.photos]]">
+          <a href="{{item.url}}" class="small_photo" style$="background-image: url('{{item.url}}')" width="100%" ;></a>
+        </template>
+      </template>
+      <template is="dom-if" if="[[!items.photos]]">
+        Oops. No photo found.
       </template>
     </div>
 
     <div class="card attendees">
       <h2>Attendees</h2>
-      <table>
-        <thead>
-          <th>#</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Check-in</th>
-        </thead>
-        <tbody>
-          <template is="dom-repeat" items="{{items.users}}" initial-count="10">
-            <tr>
-              <td>{{_plusOne(index)}}</td>
-              <td>{{item.name}}</td>
-              <td>{{item.email}}</td>
-              <td><input type="checkbox" checked="{{_showCheckbox(item.status)}}"></td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
+      <template is="dom-if" if="[[items.users]]">
+        <table>
+          <thead>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Check-in</th>
+            <th>Status</th>
+          </thead>
+          <tbody>
+            <template is="dom-repeat" items="{{items.users}}" initial-count="10">
+              <tr>
+                <td>{{_plusOne(index)}}</td>
+                <td>{{item.name}}</td>
+                <td>{{item.email}}</td>
+                <td>
+                  <input type="checkbox" checked="{{_showCheckbox(item.status)}}" on-tap="updateAttendance" path="{{index}}">
+                </td>
+                <td>{{_titleCase(item.status)}}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </template>
+      <template is="dom-if" if="[[!items.users]]">
+        <span style="margin-left: 16px">Oops. No user found.</span>
+      </template>
+
 
 
     </div>
   </template>
 
   <script>
-    class MyEvents extends Polymer.Element {
+    class MyEvents extends Polymer.GestureEventListeners(Polymer.Element) {
       static get is() { return 'my-events'; }
 
       static get observers() {
@@ -162,15 +177,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ];
       }
 
-      _plusOne(index){
+      _plusOne(index) {
         return index + 1;
       }
 
-      _showCheckbox(status){
-        return true;
-        //Absent (Checkbox disable)
-        //RSVP (Checkbox enabled)
-        //Attended (Checkbox checked)
+      _showCheckbox(status) {
+        if (status == 'Absent') {
+          return 'disabled';
+        }
+        else if (status == 'Attended') {
+          return true;
+        }
+        else {
+          return false;
+        }
       }
 
       _routePageChanged(page) {
@@ -178,11 +198,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
         }
 
-        var eventItemsRef = firebase.database().ref('fake_events/' + this.routeData.id);
-        eventItemsRef.on('value', snapshot => {
+        var eventItemsRef = firebase.database().ref('events/' + this.routeData.id);
+        eventItemsRef.once('value').then(snapshot => {
           var items = snapshot.val();
+          console.log(items)
           this.set('items', items);
         });
+      }
+
+      updateAttendance(event) {
+        var model = event.model;
+        if (event.target.checked == true) {
+          var status = 'Attended'
+          model.set('item.status', status);
+
+        }
+        else {
+          var status = 'RSVP'
+          model.set('item.status', status);
+        }
+
+        firebase.database().ref('events/' + this.routeData.id + '/users/' + event.target.path + '/status').set(status);
+      }
+
+      _titleCase(string) {
+        return string;
       }
     }
 

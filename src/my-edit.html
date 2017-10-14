@@ -85,7 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div id="cover_pic" class="image" style$="background-image:url('{{items.photoUrl}}')">
                 <div class="button" on-tap="uploadImage">
                     <iron-icon icon="my-icons:add-a-photo"></iron-icon>
-                    <span>Add Photo</span>
+                    <span>Update Photo</span>
                 </div>
             </div>
             <iron-form id="form">
@@ -127,7 +127,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var eventItemsRef = firebase.database().ref('events/' + this.routeData.id);
                 eventItemsRef.on('value', snapshot => {
                     var items = snapshot.val();
-                    this.updateId = items._id;
+                    this.updateId = items._id || items.id;
                     this.set('items', items);
                 });
             }
@@ -157,6 +157,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 form.addEventListener('iron-form-presubmit', (event) => {
                     event.preventDefault();
                     var data = form.serializeForm();
+                    console.log(this.updateId)
                     if (this.$.cover_pic_input.files && this.$.cover_pic_input.files[0]) {
                         var extension = this.$.cover_pic_input.files[0].name.split('.').pop().toLowerCase();
                         var reader = new FileReader();
@@ -179,6 +180,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                     timestamp: Date.now(),
                                     venue: data.venue,
                                 });
+
+                                window.history.pushState({}, null, '/events/' + this.updateId);
+                                window.dispatchEvent(new CustomEvent('location-changed'));
+
                             })
                         }
                         reader.readAsDataURL(this.$.cover_pic_input.files[0]);
@@ -192,6 +197,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             timestamp: Date.now(),
                             venue: data.venue,
                         });
+
+                        window.history.pushState({}, null, '/events/' + this.updateId);
+                        window.dispatchEvent(new CustomEvent('location-changed'));
+
                     }
                 });
 

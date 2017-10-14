@@ -18,26 +18,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
         padding: 10px;
       }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .card {
+        margin: 12px;
+        min-width: 360px;
+        max-width: 360px;
+        width: 360px;
+        display: flex;
+    flex-direction: column;
+      }
+
+      .card .content{
+        flex-grow: 1;
+      }
     </style>
 
     <a href="/new/" class="fab">
       <iron-icon icon="my-icons:add"></iron-icon>
     </a>
 
-    <template is="dom-repeat" items="{{items}}">
-      <div class="card">
-        <div class="image" style$="background-image: url('{{item.data.photoUrl}}')">
+    <div class="container">
+
+      <template is="dom-repeat" items="{{items}}">
+        <div class="card">
+          <div class="image" style$="background-image: url('{{item.data.photoUrl}}')">
+          </div>
+          <div class="content">
+            <h2>{{item.data.name}}</h2>
+            <p class="date">{{item.data.date}}</p>
+            <p class="detail">{{item.data.venue}} &middot; {{item.data.address}}</p>
+          </div>
+          <div class="action">
+            <a href="/events/{{item.id}}" class="button">More Info</a>
+          </div>
         </div>
-        <div class="content">
-          <h2>{{item.data.name}}</h2>
-          <p class="date">{{item.data.date}}</p>
-          <p class="detail">{{item.data.venue}} &middot; {{item.data.address}}</p>
-        </div>
-        <div class="action">
-          <a href="/events/{{item.id}}" class="button">More Info</a>
-        </div>
-      </div>
-    </template>
+      </template>
+
+    </div>
   </template>
 
   <script>
@@ -54,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       ready() {
         super.ready();
-        var eventItemsRef = firebase.database().ref('fake_events/');
+        var eventItemsRef = firebase.database().ref('events/');
         eventItemsRef.on('value', snapshot => {
           var items = snapshot.val();
           items = Object.keys(items).map(function (key) {
