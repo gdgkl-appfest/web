@@ -1,0 +1,110 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view2">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      .card {
+        max-width: 1000px;
+      }
+
+      .card .image {
+        height: 400px;
+      }
+
+      .row {
+        display: flex;
+      }
+
+      .row paper-input {
+        margin-right: 8px;
+      }
+
+      .card .image {
+        position: relative;
+      }
+
+      .card .image .button {
+        display: flex;
+        bottom: 16px;
+        right: 16px;
+        background: white;
+        position: absolute;
+        padding: 8px 16px;
+        border-radius: 4px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .card .image .button span{
+        margin-top: 1px;
+      }
+
+      .card .image .button iron-icon{
+        margin-right: 8px;
+      }
+
+      .card .action .button {
+        margin-left: 12px;
+      }
+
+      paper-input,
+      paper-textarea {
+        max-width: 680px;
+      }
+    </style>
+
+    <div class="card">
+      <div class="image" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/ioxkl17.appspot.com/o/images%2Fcover.jpg?alt=media')">
+        <div class="button">
+          <iron-icon icon="my-icons:add-a-photo"></iron-icon>
+          <span>Add Photo</span>
+        </div>
+      </div>
+      <div class="content">
+        <paper-input value="Google I/O Extended 2017 Kuala Lumpur" label="Event Name" required></paper-input>
+        <div class="row">
+          <paper-input value="9:00 AM" label="Start Time" required></paper-input>
+          <paper-input value="6:00 PM" label="End Time" required></paper-input>
+        </div>
+        <paper-input value="Google Malaysia" label="Venue Name" required></paper-input>
+        <paper-textarea value="Axiata Tower (Quill 7), 9, Jalan Stesen Sentral 5, Kuala Lumpur Sentral, 50470 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur, Malaysia"
+          label="Venue Address"></paper-textarea>
+        <paper-textarea value="Google IO Extended Kuala Lumpur will once again happen on the 22nd of July 2017! We will be inviting speakers that are consists of local experts and Googlers to come and share about the experience in using Google technologies and best practices to propel your journey forward as a developer.
+        
+        Don't miss your chance to learn more about the latest and greatest Google technologies and 1337 Dev skills from the dev experts! Seats will be limited, sign up now!"
+          label="Description"></paper-textarea>
+      </div>
+      <div class="action">
+        <a href="/" class="button">Discard</a>
+        <a href="/" class="button">Save</a>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class MyView2 extends Polymer.Element {
+      static get is() { return 'my-view2'; }
+    }
+
+    window.customElements.define(MyView2.is, MyView2);
+  </script>
+</dom-module>

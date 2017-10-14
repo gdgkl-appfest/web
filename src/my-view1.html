@@ -1,0 +1,64 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+    </style>
+
+    <div class="fab">
+      <iron-icon icon="my-icons:add"></iron-icon>
+    </div>
+
+    <div class="card">
+      <div class="image" style="background-image: url('https://firebasestorage.googleapis.com/v0/b/ioxkl17.appspot.com/o/images%2Fcover.jpg?alt=media')">
+      </div>
+      <div class="content">
+        <h2>Google I/O Extended 2017 Kuala Lumpur</h2>
+        <p class="date">9AM - 6PM. Sat, 12 July 2017</p>
+        <p class="detail">Google Malaysia &middot; Axiata Tower (Quill 7), 9, Jalan Stesen Sentral 5, Kuala Lumpur Sentral, 50470 Kuala Lumpur,
+          Wilayah Persekutuan Kuala Lumpur, Malaysia</p>
+      </div>
+      <div class="action">
+        <a href="/" class="button">More Info</a>
+      </div>
+    </div>
+
+    <div class="card">
+        <div class="image" style="background-image: url('https://jomcodekl17.firebaseapp.com/images/social/social.jpg')">
+        </div>
+        <div class="content">
+          <h2>JomCode Kuala Lumpur 2017</h2>
+          <p class="date">3PM - 6PM. Mon, 3 March 2017</p>
+          <p class="detail">Google Malaysia &middot; Axiata Tower (Quill 7), 9, Jalan Stesen Sentral 5, Kuala Lumpur Sentral, 50470 Kuala Lumpur,
+            Wilayah Persekutuan Kuala Lumpur, Malaysia</p>
+        </div>
+        <div class="action">
+          <a href="/" class="button">More Info</a>
+        </div>
+      </div>
+  </template>
+
+  <script>
+    class MyView1 extends Polymer.Element {
+      static get is() { return 'my-view1'; }
+    }
+
+    window.customElements.define(MyView1.is, MyView1);
+  </script>
+</dom-module>
